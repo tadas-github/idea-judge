@@ -54,36 +54,49 @@ Respond ONLY with valid JSON (no markdown):
 
 function parseArgs(argv) {
   const args = argv.slice(2);
-  const opts = { ideas: null, context: 'A product or startup', judges: 10 };
+  const opts = {
+    ideas: null,
+    context: 'A product or startup',
+    judges: 10,
+    model: 'claude-haiku-4-5',
+    synthModel: null, // defaults to model if not set
+  };
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--context' || args[i] === '-c') opts.context = args[++i];
     else if (args[i] === '--judges' || args[i] === '-j') opts.judges = parseInt(args[++i]);
+    else if (args[i] === '--model' || args[i] === '-m') opts.model = args[++i];
+    else if (args[i] === '--synth-model') opts.synthModel = args[++i];
     else if (args[i] === '--help' || args[i] === '-h') {
       console.log(`
 Usage: idea-judge "idea one | idea two | idea three" [options]
 
 Options:
-  --context, -c   Product/market context (default: "A product or startup")
-  --judges,  -j   Number of judge personas 1-10 (default: 10)
-  --help,    -h   Show help
+  --context, -c    Product/market context (default: "A product or startup")
+  --judges,  -j    Number of judge personas 1-10 (default: 10)
+  --model,   -m    Model for judges (default: claude-haiku-4-5)
+  --synth-model    Model for synthesis step (default: same as --model)
+  --help,    -h    Show help
 
 Environment:
   ANTHROPIC_API_KEY  Required
 
-Example:
-  idea-judge "playground | CLI tool | GitHub badge" --context "AI agent directory, 53 users/month"
+Examples:
+  idea-judge "playground | CLI tool | badge" --context "AI directory, 53 users/month"
+  idea-judge "idea A | idea B" --judges 5 --model claude-sonnet-4-5
+  idea-judge "idea A | idea B" --model claude-haiku-4-5 --synth-model claude-sonnet-4-5
 `);
       process.exit(0);
     } else if (!args[i].startsWith('-')) {
       opts.ideas = args[i];
     }
   }
+  opts.synthModel = opts.synthModel || opts.model;
   return opts;
 }
 
-async function judgeOne(client, name, persona, context, ideas, ideasStr) {
+async function judgeOne(client, name, persona, context, ideas, ideasStr, model) {
   const msg = await client.messages.create({
-    model: 'claude-haiku-4-5',
+    model,
     max_tokens: 800,
     messages: [{ role: 'user', content: JUDGE_PROMPT(name, persona, context, ideasStr) }],
   });
@@ -115,10 +128,11 @@ async function main() {
   const ideasStr = ideas.map(i => `- ${i}`).join('\n');
   const personas = PERSONAS.slice(0, Math.min(opts.judges, 10));
 
-  console.log(`\n🧠 Spawning ${personas.length} judges for ${ideas.length} ideas...\n`);
+  console.log(`\n🧠 Spawning ${personas.length} judges for ${ideas.length} ideas...`);
+  console.log(`   Judge model: ${opts.model} | Synth model: ${opts.synthModel}\n`);
 
   const results = await Promise.all(
-    personas.map(([name, persona]) => judgeOne(client, name, persona, opts.context, ideas, ideasStr))
+    personas.map(([name, persona]) => judgeOne(client, name, persona, opts.context, ideas, ideasStr, opts.model))
   );
 
   console.log('='.repeat(60));
@@ -142,7 +156,7 @@ async function main() {
   console.log('🔬 Synthesizing...\n');
 
   const synMsg = await client.messages.create({
-    model: 'claude-haiku-4-5',
+    model: opts.synthModel,
     max_tokens: 1000,
     messages: [{ role: 'user', content: SYNTHESIS_PROMPT(opts.context, ideasStr, verdictsText.slice(0, 4000)) }],
   });
