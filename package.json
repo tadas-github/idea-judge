@@ -1,6 +1,6 @@
 {
   "name": "idea-judge",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Spawn 10 AI judge personas to evaluate competing ideas and pick the best one",
   "type": "module",
   "bin": {
