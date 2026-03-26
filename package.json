@@ -1,0 +1,26 @@
+{
+  "name": "idea-judge",
+  "version": "1.0.0",
+  "description": "Spawn 10 AI judge personas to evaluate competing ideas and pick the best one",
+  "type": "module",
+  "bin": {
+    "idea-judge": "bin/idea-judge.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0"
+  },
+  "keywords": [
+    "ai",
+    "ideas",
+    "judge",
+    "agents",
+    "cli",
+    "brainstorm",
+    "evaluation"
+  ],
+  "author": "tadas-github",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -2,12 +2,15 @@
 
 Spawn 10 AI judge personas in parallel to evaluate competing ideas and pick the best one.
 
-Each judge has a distinct expert lens — Developer, Skeptic, Growth Hacker, End User, Investor, Competitor Analyst, Product Designer, Marketer, Enterprise Buyer, Contrarian. They vote, then a synthesizer produces a final recommendation with confidence and risks.
+```bash
+npx idea-judge "idea one | idea two | idea three" --context "your product context"
+```
 
 ## Install
 
 ```bash
-pip install anthropic
+npm install -g idea-judge
+# or just use npx (no install needed)
 ```
 
 ## Usage
@@ -15,27 +18,26 @@ pip install anthropic
 ```bash
 export ANTHROPIC_API_KEY=your_key_here
 
-python judge.py "idea one | idea two | idea three" \
-  --context "Your product/market context" \
-  --judges 10
-```
-
-## Example
-
-```bash
-python judge.py \
-  "Agent playground | CLI search tool | GitHub badge | Weekly digest" \
+npx idea-judge "playground | CLI tool | GitHub badge" \
   --context "AI agent directory, 53 users/month, goal: drive adoption" \
   --judges 10
 ```
 
+## Options
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `--context`, `-c` | Product/market context | "A product or startup" |
+| `--judges`, `-j` | Number of judge personas (1–10) | 10 |
+| `--help`, `-h` | Show help | |
+
 ## Output
 
-- Per-judge scores (1–10) for each idea with one-line verdict
+- Per-judge scores (1–10) for each idea
 - Each judge picks a winner from their perspective
-- Synthesizer tallies votes → 🏆 Winner + confidence + risks + 🥈 runner-up
+- Final synthesis: 🏆 Winner + confidence + risks + 🥈 runner-up
 
-## Judges
+## Judge personas
 
 | Persona | Focus |
 |---------|-------|
@@ -50,10 +52,13 @@ python judge.py \
 | Enterprise Buyer | Security, reliability, TCO |
 | Contrarian | Non-consensus bet |
 
-Uses `claude-haiku-4-5` for judges (parallel), `claude-haiku-4-5` for synthesis.
+All 10 judges run in parallel. Requires `ANTHROPIC_API_KEY`.
 
 ## Requirements
 
-- Python 3.8+
-- `anthropic` Python package
+- Node.js 18+
 - `ANTHROPIC_API_KEY` environment variable
+
+## License
+
+MIT
